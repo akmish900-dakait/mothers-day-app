@@ -37,7 +37,6 @@
           const saved = localStorage.getItem("my_defaults");
           return saved ? JSON.parse(saved) : [{ id: 1, name: "Morning Tea", s: "06:30", cat: "Kitchen" }];
         });
-        const [isHoliday, setIsHoliday] = useState(false);
         const [isVacation, setIsVacation] = useState(false);
         const [tiredId, setTiredId] = useState(null);
 
@@ -47,6 +46,7 @@
             setIsVacation(true);
             setChores([]);
           } else {
+            setIsVacation(false);
             setChores([...defaults]);
           }
           if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
@@ -73,6 +73,7 @@
         const addItem = (name, time, saveDefault) => {
           if (!name || !time) return;
           const item = { id: Date.now(), name, s: time, cat: isVacation ? "Travel" : "Kitchen" };
+          
           if (saveDefault) {
             const newDefs = [...defaults, item];
             setDefaults(newDefs);
@@ -94,19 +95,13 @@
         return (
           <div style={{ padding: "20px", fontFamily: "'Jost', sans-serif", maxWidth: "450px", margin: "auto" }}>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "32px", marginBottom: "5px" }}>
-              {isVacation ? "🏖️ Vacation Mode" : "Our Vision Board"}
+              {isVacation ? "🌍 Vacation Mode" : "Our Vision Board"}
             </h1>
             <p style={{ fontSize: "12px", color: "#888", marginBottom: "20px" }}>{new Date().toDateString()}</p>
             
-            {!isVacation && !isHoliday && (
-              <button onClick={() => { setIsHoliday(true); setChores([]); }} 
-                style={{ width: "100%", padding: "12px", background: "#f0fdf4", color: "#166534", border: "none", borderRadius: "12px", marginBottom: "20px", fontWeight: "500" }}>
-                🏖️ Today is a Holiday
-              </button>
-            )}
-
             <div style={{ minHeight: "150px" }}>
-              {isHoliday ? <p style={{ textAlign: "center", color: "#666" }}>Enjoy your holiday rest! 🍦</p> : chores.map(c => (
+              {chores.length === 0 && <p style={{ textAlign: "center", color: "#666" }}>No tasks listed yet.</p>}
+              {chores.map(c => (
                 <div key={c.id} style={{ display: "flex", justifyContent: "space-between", padding: "15px", background: "#fff", borderRadius: "14px", marginBottom: "10px", border: "1px solid #eee", boxShadow: "0 2px 5px rgba(0,0,0,0.03)" }}>
                   <div>
                     <div style={{ fontWeight: "500" }}>{c.name}</div>
@@ -123,7 +118,9 @@
                 <input id="tt" type="time" style={{ padding: "10px", borderRadius: "10px", border: "1px solid #ddd" }} />
                 <button onClick={() => addItem(document.getElementById('tn').value, document.getElementById('tt').value, false)} style={{ flex: 1, background: "#000", color: "#fff", border: "none", borderRadius: "10px", fontWeight: "500" }}>Add Task</button>
               </div>
-              <button onClick={() => addItem(document.getElementById('tn').value, document.getElementById('tt').value, true)} style={{ width: "100%", background: "none", border: "1px solid #ddd", color: "#666", padding: "8px", borderRadius: "10px", fontSize: "12px" }}>Save as Everyday Task</button>
+              {!isVacation && (
+                <button onClick={() => addItem(document.getElementById('tn').value, document.getElementById('tt').value, true)} style={{ width: "100%", background: "none", border: "1px solid #ddd", color: "#666", padding: "8px", borderRadius: "10px", fontSize: "12px" }}>Save as Everyday Task</button>
+              )}
             </div>
 
             {tiredId && (
@@ -139,7 +136,6 @@
         );
       }
 
-      // THE KEY FIX: Actually rendering the app
       const root = ReactDOM.createRoot(document.getElementById('root'));
       root.render(<App />);
     </script>
